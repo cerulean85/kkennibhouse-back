@@ -1,0 +1,21 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+server:
+  port: 8080
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIAUPMYNCSOGUCOYXP5
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+    dynamodb:
+      endpoint: https://dynamodb.ap-northeast-2.amazonaws.com
