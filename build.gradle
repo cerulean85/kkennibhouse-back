@@ -4,10 +4,6 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
-ext {
-	springCloudVersion = "2024.0.1"
-}
-
 group = 'net.kkennib'
 version = '0.0.1-SNAPSHOT'
 
@@ -24,17 +20,39 @@ configurations {
 }
 
 repositories {
-	mavenCentral()  // Maven Central 리포지토리 사용
-	jcenter()       // JCenter 사용 (필요한 경우)
+	mavenCentral()
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.projectlombok:lombok:1.18.24'
-	annotationProcessor 'org.projectlombok:lombok:1.18.24'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation 'com.amazonaws.serverless:aws-serverless-java-container-springboot3:2.0.1'
+	implementation 'org.springframework.cloud:spring-cloud-function-adapter-aws:3.2.5'
+	implementation 'org.springframework.cloud:spring-cloud-starter-function-web:3.2.5'
+	implementation 'com.amazonaws:aws-lambda-java-core:1.2.3'
+	implementation 'com.amazonaws:aws-lambda-java-events:3.11.4'
 	implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.429'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
+
+task buildZip(type: Zip) {
+	from compileJava
+	from processResources
+//	dependencies {
+//		exclude(group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat')
+//	}
+	into('lib') {
+		from(configurations.compileClasspath) {
+			exclude 'tomcat-embed-*'
+		}
+	}
+}
+
+build.dependsOn buildZip
 
 
 tasks.named('test') {
