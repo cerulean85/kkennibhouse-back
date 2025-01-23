@@ -86,6 +86,3 @@
 - [[Spring / AWS] Spring Boot 3 + AWS Lambda 사용하기](https://davidy87.tistory.com/37)
 - [AWS API Gateway Custom domain 설정](https://seokbin.tistory.com/entry/AWS-API-Gateway-Custom-domain-%EC%84%A4%EC%A0%95?category=678488)
 - [AWS Lambda + API Gateway로 Serverless API 환경 구성하기](	https://velog.io/@seeh_h/AWS-Lambda-API-Gateway%EB%A1%9C-API-%EB%A7%8C%EB%93%A4%EA%B8%B0)
-
-## 사설..
-- Labmda 배포 간단하게 생각했다가 의외로 많은 AWS 서비스를 만져줘야 해서 살짝 놀람.. ㅠㅠ
