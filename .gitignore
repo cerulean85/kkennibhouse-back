@@ -2,7 +2,6 @@ HELP.md
 .gradle
 .idea
 build/
-src/main/java/
 src/main/resources/application.properties
 src/main/resources/application.yml
 !gradle/wrapper/gradle-wrapper.jar
