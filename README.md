@@ -1,4 +1,6 @@
-# Lambda로 서버 배포하기
+# Spring Boot 서버 AWS Lambda로 배포하기
+- Spring Boot 서버를 AWS Lambda로 배포하려면 다음의 AWS 서비스에 대한 사전 사전 지식이 필요함
+  - IAM, Route 53, CloudFormation, API Gateway, Lambda, S3, DynamoDB, ACM
 
 ## IAM 사용자 생성
 - IAM > 사용자 > 사용자 생성 > 사용자 이름 입력: kkennib > 다음
@@ -10,7 +12,7 @@
   - AWSCloudFormationFullAccess
   - AWSLambda_FullAccess
   - IAMFullAccess
-- 위의 권한은 테스트용이므로 더 디테일하게 넣는 것을 추천
+- 위의 권한은 테스트용이므로 더 세부적으로 구분하여 디테일하게 넣는 것을 추천
 
 ## 액세스키 생성
 - IAM > 사용자 > 사용자 선택 > 보안 자격 증명 > 액세스 키 만들기 > AWS 외부에서 실행되는 애플리케이션 > 액세스 키 메모 > 액세스 키 만들기
@@ -83,4 +85,7 @@
 ## 참고		
 - [[Spring / AWS] Spring Boot 3 + AWS Lambda 사용하기](https://davidy87.tistory.com/37)
 - [AWS API Gateway Custom domain 설정](https://seokbin.tistory.com/entry/AWS-API-Gateway-Custom-domain-%EC%84%A4%EC%A0%95?category=678488)
-- [AWS Lambda + API Gateway로 Serverless API 환경 구성하기](	https://velog.io/@seeh_h/AWS-Lambda-API-Gateway%EB%A1%9C-API-%EB%A7%8C%EB%93%A4%EA%B8%B0)		
+- [AWS Lambda + API Gateway로 Serverless API 환경 구성하기](	https://velog.io/@seeh_h/AWS-Lambda-API-Gateway%EB%A1%9C-API-%EB%A7%8C%EB%93%A4%EA%B8%B0)
+
+## 사설..
+- Labmda 배포 간단하게 생각했다가 의외로 많은 AWS 서비스를 만져줘야 해서 살짝 놀람.. ㅠㅠ
