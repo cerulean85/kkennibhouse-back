@@ -18,10 +18,8 @@
   - 키가 Git에 노출되면 생성을 다시 해줘야 함
 
 ## DynamoDB 조회 앱 서버
-- 다음 Repository의 앱 사용
-	- https://github.com/cerulean85/kkennibhouse-back/tree/main
-- Lambda 배포를 위해 필요한 파일
-  - StreamLambdaHandler.java, RequestStreamHandler.java, template.yml
+- 해당 Repository Clone
+  - Lambda 배포를 위해 필요한 파일: StreamLambdaHandler.java, RequestStreamHandler.java, template.yml
 
 ## AWS SAM (AWS Serveless Application Model) CLI 설치
 - https://docs.aws.amazon.com/ko_kr/serverless-application-model/latest/developerguide/install-sam-cli.html
