@@ -21,7 +21,7 @@ public class PostController {
     private PostService postService;
 
     @GetMapping("/post/{articleType}/{postId}")
-    public Mono<ResponseEntity<Post>> getCustomerById(
+    public Mono<ResponseEntity<Post>> getPostList(
             @PathVariable("articleType") String articleType,
             @PathVariable("postId") String postId) {
 
