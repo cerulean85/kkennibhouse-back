@@ -1,16 +1,19 @@
 package net.kkennib.house.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import net.kkennib.house.models.Post;
 import net.kkennib.house.models.PostResponse;
 import net.kkennib.house.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import reactor.core.publisher.Mono;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,9 +37,23 @@ public class PostController {
             @PathVariable("articleType") String articleType,
             @PathVariable("pageNo") int pageNo)
     {
-        Mono<PostResponse> res = postService.getPosts(articleType, pageNo);
+        Mono<PostResponse> res = null;
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String url = request.getRequestURL().toString();
+        if (url.contains("localhost")) {
+            res = postService.getPostsFromLocal(articleType, pageNo);
+        } else {
+            res = postService.getPosts(articleType, pageNo);
+        }
         return res.map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/post")
+    Mono<ResponseEntity<PostResponse>> createPost(@RequestBody Post post)
+    {
+        Mono<PostResponse> res = postService.createPost(post);
+        return res.map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/test")

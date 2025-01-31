@@ -11,6 +11,7 @@ import java.util.List;
 
 @Data
 public class PostResponse {
+    private boolean isSuccess;
     private int totalItemCount;
     private int totalPageCount;
     private int currentPageNo;
