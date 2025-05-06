@@ -1,5 +1,7 @@
 package net.kkennib.house.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import net.kkennib.house.models.Post;
@@ -33,8 +35,12 @@ public class PostController {
     }
 
     @GetMapping("/posts/{articleType}/{pageNo}")
+    @Operation(summary="글 목록 조회", description="글유형과 페이지번호에 따른 글 조회")
     public Mono<ResponseEntity<PostResponse>> getPosts(
+            @Parameter(description = "글 유형", example = "dev")
             @PathVariable("articleType") String articleType,
+
+            @Parameter(description = "글 유형", example = "dev, archive, insight, memo 등")
             @PathVariable("pageNo") int pageNo)
     {
         Mono<PostResponse> res = null;

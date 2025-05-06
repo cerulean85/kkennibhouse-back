@@ -29,7 +29,7 @@ class KkennibHouseServerAppApplicationTests {
 //		deletePosts();
 //		readJsonPost();
         readAndDeletePosts("dev");
-		readAndDeletePosts("essay");
+		readAndDeletePosts("insight");
 		readAndDeletePosts("memo");
 	}
 
