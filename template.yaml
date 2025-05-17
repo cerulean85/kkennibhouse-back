@@ -13,7 +13,14 @@ Resources:
       Runtime: java17
       CodeUri: .
       MemorySize: 512
-      Policies: AWSLambdaBasicExecutionRole
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: arn:aws:secretsmanager:ap-northeast-2:307946656924:secret:neon-kkennibdb-postgreSQL-bbIyPv
       Timeout: 30
       Events:
         ProxyResource:
