@@ -11,7 +11,7 @@ Resources:
     Properties:
       Handler: net.kkennib.house.StreamLambdaHandler::handleRequest
       Runtime: java17
-      CodeUri: .aws-sam/build/UntitledFunction/
+      CodeUri: ./
       MemorySize: 512
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -28,7 +28,6 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource: arn:aws:secretsmanager:ap-northeast-2:307946656924:secret:neon-kkennibdb-postgreSQL-bbIyPv
-
       Timeout: 30
       Events:
         ProxyResource:
