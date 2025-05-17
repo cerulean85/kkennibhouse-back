@@ -15,21 +15,19 @@ Resources:
       MemorySize: 512
       Policies:
         - AWSLambdaBasicExecutionRole
-        - PolicyName: DynamoDBAndSecretsManagerAccess
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                  - dynamodb:PutItem
-                  - dynamodb:Query
-                  - dynamodb:Scan
-                Resource: arn:aws:dynamodb:ap-northeast-2:511682656426:table/article
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: arn:aws:secretsmanager:ap-northeast-2:307946656924:secret:neon-kkennibdb-postgreSQL-bbIyPv
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:Query
+                - dynamodb:Scan
+              Resource: arn:aws:dynamodb:ap-northeast-2:511682656426:table/article
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: arn:aws:secretsmanager:ap-northeast-2:307946656924:secret:neon-kkennibdb-postgreSQL-bbIyPv
 
       Timeout: 30
       Events:
