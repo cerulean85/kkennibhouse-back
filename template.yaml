@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWS Serverless Spring Boot 2 API - kkennibhouse
+Description: AWS Serverless Spring Boot 2 API - kkennibApp
 Globals:
   Api:
     EndpointConfiguration: REGIONAL
 
 Resources:
-  UntitledFunction:
+  KkennibAppFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: net.kkennib.house.StreamLambdaHandler::handleRequest
@@ -37,4 +37,4 @@ Outputs:
     Description: URL for application
     Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/ping'
     Export:
-      Name: KkennibServer
+      Name: KkennibAppServer
