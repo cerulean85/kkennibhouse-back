@@ -24,6 +24,10 @@ Resources:
                 - dynamodb:Query
                 - dynamodb:Scan
               Resource: arn:aws:dynamodb:ap-northeast-2:307946656924:table/Post
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: arn:aws:secretsmanager:ap-northeast-2:307946656924:secret:neon-kkennibdb-postgreSQL-bbIyPv
       Timeout: 30
       Events:
         ProxyResource:
