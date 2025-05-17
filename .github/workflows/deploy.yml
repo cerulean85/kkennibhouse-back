@@ -19,8 +19,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
+      - name: Build with Gradle
+        run: ./gradlew build
 
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
