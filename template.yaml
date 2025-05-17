@@ -11,7 +11,7 @@ Resources:
     Properties:
       Handler: net.kkennib.house.StreamLambdaHandler::handleRequest
       Runtime: java17
-      CodeUri: .
+      CodeUri: .aws-sam/build/
       MemorySize: 512
       Policies:
         - AWSLambdaBasicExecutionRole
