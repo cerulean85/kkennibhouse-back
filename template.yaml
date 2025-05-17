@@ -23,7 +23,7 @@ Resources:
                 - dynamodb:PutItem
                 - dynamodb:Query
                 - dynamodb:Scan
-              Resource: arn:aws:dynamodb:ap-northeast-2:511682656426:table/article
+              Resource: arn:aws:dynamodb:ap-northeast-2:307946656924:table/Post
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
