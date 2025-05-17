@@ -4,7 +4,7 @@ Description: AWS Serverless Spring Boot 2 API - kkennibhouse
 Globals:
   Api:
     EndpointConfiguration: REGIONAL
-
+ 
 Resources:
   UntitledFunction:
     Type: AWS::Serverless::Function
