@@ -26,7 +26,7 @@ public class PostRepository {
     @Autowired
     private CustomSettings customSettings;
 
-    public Post getPostById(String articleType, String postId) {
+    public Post getPostById(String articleType, int postId) {
         return dynamoDBMapper.load(Post.class, articleType, postId);
     }
 

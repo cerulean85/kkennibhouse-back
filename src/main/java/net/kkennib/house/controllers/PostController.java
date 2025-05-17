@@ -28,7 +28,7 @@ public class PostController {
     @GetMapping("/post/{articleType}/{postId}")
     public Mono<ResponseEntity<Post>> getPostList(
             @PathVariable("articleType") String articleType,
-            @PathVariable("postId") String postId) {
+            @PathVariable("postId") int postId) {
 
         Mono<Post> res = postService.getPostById(articleType, postId);
         return res.map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());

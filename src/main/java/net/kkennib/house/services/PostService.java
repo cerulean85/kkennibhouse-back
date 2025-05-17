@@ -19,7 +19,7 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    public Mono<Post> getPostById(String articleType, String postId) {
+    public Mono<Post> getPostById(String articleType, int postId) {
         return Mono.just(postRepository.getPostById(articleType, postId));
     }
 
