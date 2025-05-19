@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class PostResponse {
@@ -16,4 +17,5 @@ public class PostResponse {
     private int totalPageCount;
     private int currentPageNo;
     private List<Post> list;
+    private Map<String, Integer> subTypeCounts;
 }

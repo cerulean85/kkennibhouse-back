@@ -46,11 +46,11 @@ public class PostController {
         Mono<PostResponse> res = null;
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String url = request.getRequestURL().toString();
-        if (url.contains("localhost")) {
-            res = postService.getPostsFromLocal(articleType, pageNo);
-        } else {
-            res = postService.getPosts(articleType, pageNo);
-        }
+//        if (url.contains("localhost")) {
+//            res = postService.getPostsFromLocal(articleType, pageNo);
+//        } else {
+        res = postService.getPosts(articleType, pageNo);
+//        }
         return res.map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

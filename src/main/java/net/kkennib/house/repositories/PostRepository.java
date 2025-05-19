@@ -2,6 +2,7 @@ package net.kkennib.house.repositories;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.Select;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class PostRepository {
@@ -37,20 +39,38 @@ public class PostRepository {
         int endNo = totalItemCount - (pageNo - 1) * pageUnitCount;
         int startNo = Math.max(endNo -  pageUnitCount + 1, 1);
 
+        // 본문 목록 조회
         DynamoDBQueryExpression<Post> queryExpression = new DynamoDBQueryExpression<Post>()
                 .withKeyConditionExpression("articleType = :articleType AND postId BETWEEN :start AND :end")
                 .withExpressionAttributeValues(Map.of(
-                        ":articleType", new AttributeValue().withS(articleType),  // userId는 문자열(S)
-                        ":start", new AttributeValue().withN(String.valueOf(startNo)),      // postId는 숫자(N)
+                        ":articleType", new AttributeValue().withS(articleType),
+                        ":start", new AttributeValue().withN(String.valueOf(startNo)),
                         ":end", new AttributeValue().withN(String.valueOf(endNo))
-                )).withScanIndexForward(false);  // 내림차순으로 정렬;
+                ))
+                .withScanIndexForward(false);
 
         List<Post> items = new ArrayList<>(dynamoDBMapper.query(Post.class, queryExpression));
+
+        // 전체 subType 카운트 수집 (Scan 필요)
+        Map<String, AttributeValue> scanValues = Map.of(
+                ":articleType", new AttributeValue().withS(articleType)
+        );
+
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("articleType = :articleType")
+                .withExpressionAttributeValues(scanValues);
+
+        List<Post> allItems = dynamoDBMapper.scan(Post.class, scanExpression);
+        Map<String, Integer> subTypeCounts = allItems.stream()
+                .collect(Collectors.groupingBy(Post::getSubType, Collectors.collectingAndThen(Collectors.counting(), Long::intValue)));
+
+        // 응답 조립
         PostResponse result = new PostResponse();
         result.setTotalItemCount(totalItemCount);
         result.setTotalPageCount(totalSegmentCount);
         result.setCurrentPageNo(pageNo);
         result.setList(items);
+        result.setSubTypeCounts(subTypeCounts);
         return result;
     }
 
