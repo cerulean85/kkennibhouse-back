@@ -2,7 +2,7 @@ package net.kkennib.house.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import net.kkennib.house.services.SecretsManagerService;
+import net.kkennib.house.service.SecretsManagerService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,23 +1,21 @@
 package net.kkennib.house;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.kkennib.house.models.Post;
-import net.kkennib.house.repositories.PostRepository;
+import net.kkennib.house.member.service.MemberService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @SpringBootTest
 class KkennibHouseServerAppApplicationTests {
+
+//  @Autowired
+//  MemberService memberService;
+
+//  	@Test
+//	void testGround() {
+//
+//	}
+
 //
 //	@Autowired
 //	PostRepository postRepository;

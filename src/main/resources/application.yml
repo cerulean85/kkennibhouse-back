@@ -12,7 +12,8 @@ spring:
         format_sql: true
 
 server:
-  port: 8080
+  domain: https://stock.kkennib.net
+  port: 8081
 
 cloud:
   aws:
@@ -20,7 +21,12 @@ cloud:
       static: ap-northeast-2
     dynamodb:
       endpoint: https://dynamodb.ap-northeast-2.amazonaws.com
+    s3:
+      bucket-name: kkennib-s3
 
 custom:
   settings:
     page-count: 20
+
+google:
+  client-id: 869848138291-enoea2g8mspqsc31tudefitab5atl5c4.apps.googleusercontent.com
