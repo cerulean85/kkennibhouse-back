@@ -1,6 +1,5 @@
 package net.kkennib.house.member.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -11,19 +10,14 @@ import net.kkennib.house.member.dto.MemberDto;
 import net.kkennib.house.member.dto.MemberResponse;
 import net.kkennib.house.member.entity.Member;
 import net.kkennib.house.member.entity.ResetToken;
-import net.kkennib.house.member.mapper.MemberMapper;
 import net.kkennib.house.member.repository.MemberRepository;
 import net.kkennib.house.member.repository.ResetTokenRepository;
-import net.kkennib.house.service.JwtService;
-import net.kkennib.house.util.GoogleTokenVerifier;
+import net.kkennib.house.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-
-import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -41,12 +35,12 @@ import static net.kkennib.house.util.ResponseFactory.*;
 @RequiredArgsConstructor
 public class MemberService {
 
-  private final JwtService jwtService;
-  private final GoogleTokenVerifier googleTokenVerifier;
-  private final MemberRepository memberRepository;
-  private final MemberMapper memberMapper;
 
+  @Autowired
+  private JwtUtil jwtUtil;
+  private final MemberRepository memberRepository;
   private final ResetTokenRepository tokenRepository;
+  private final BCryptPasswordEncoder passwordEncoder;
 
   @Autowired
   private Configuration freemarkerConfig;
@@ -54,11 +48,25 @@ public class MemberService {
   @Value("${server.domain}") private String serverDomain;
 
   public ServiceResponse<MemberResponse> getEmailMemberByPasswordAndAccountType(String email, String password, String accountType) {
-    MemberDto memberDto = this.getMemberFromEmailPasswordAccountType(email, password, accountType);
-    if (memberDto.getNo() == 0L) {
+    Optional<Member> optionalMember = memberRepository.findByEmailAndAccountType(email, accountType);
+    if (optionalMember.isEmpty()) {
       return createErrorResponse("Member not found or invalid credentials");
     }
-    MemberResponse memberResponse = memberMapper.toResponse(memberDto);
+
+    Member member = optionalMember.get();
+    if (!passwordEncoder.matches(password, member.getPassword())) { // 암호화된 비밀번호 비교
+      return createErrorResponse("Invalid credentials");
+    }
+
+    MemberResponse memberResponse = MemberResponse.of(
+            member.getNo(),
+            member.getEmail(),
+            member.getAccountType(),
+            member.getName(),
+            member.getPicture());
+    memberResponse.setAccessToken(this.getAccessToken(email));
+    memberResponse.setRefreshToken(this.getRefreshToken(email));
+
     return createSuccessResponse(memberResponse);
   }
 
@@ -69,7 +77,7 @@ public class MemberService {
     }
 
     Member member = optionalMember.get();
-    return MemberDto.of(member.getNo(), member.getEmail(), member.getAccountType());
+    return MemberDto.of(member.getNo(), member.getEmail(), member.getAccountType(), member.getName(), member.getPicture());
   }
 
   public ServiceResponse<Boolean> validatePasswordResetToken(String token) {
@@ -89,14 +97,22 @@ public class MemberService {
     return createSuccessResponse(true);
   }
 
-  public ServiceResponse<Boolean> updatePassword(Long memberNo, String token, String newPassword) {
+  public ServiceResponse<Boolean> updatePassword(String token, String newPassword) {
     ServiceResponse<Boolean> tokenResponse = validatePasswordResetToken(token);
     if (!tokenResponse.isSuccess()) {
       return createErrorResponse("Invalid or expired token");
     }
 
+    Long memberNo = tokenRepository.findByToken(token)
+            .map(ResetToken::getUserId)
+            .orElse(0L);
+
+    if (memberNo == 0L) {
+      return createErrorResponse("Member number not found for the provided token");
+    }
+
     ServiceResponse<Boolean> response = createResponse(false);
-    Optional<Member> optMember = memberRepository.findById(memberNo);
+    Optional<Member> optMember = memberRepository.findById (memberNo);
     if (optMember.isEmpty()) {
       response.setMessage("Member not found");
       return response;
@@ -108,7 +124,8 @@ public class MemberService {
     }
 
     Member member = optMember.get();
-    member.setPassword(newPassword); // 비밀번호 업데이트
+    String encryptedPassword = passwordEncoder.encode(newPassword); // 비밀번호 암호화
+    member.setPassword(encryptedPassword); // 비밀번호 업데이트
     memberRepository.save(member);
 
     ResetToken resetToken = tokenRepository.findByToken(token).get();
@@ -119,15 +136,62 @@ public class MemberService {
     return response;
   }
 
-  public ServiceResponse<MemberResponse> createEmailMember(String email, String password, String accountType) {
-    Member member = memberRepository.save(new Member(email, password, accountType));
+  public ServiceResponse<Boolean> updateName(String email, String name) {
+    Optional<Member> optMember = memberRepository.findByEmail(email);
+    if (optMember.isEmpty()) {
+      return createErrorResponse("Member not found");
+    }
+
+    Member member = optMember.get();
+    if (name != null && !name.isBlank()) {
+      member.setName(name);
+      memberRepository.save(member); // DB 업데이트
+      return createSuccessResponse(true);
+    }
+
+    return createErrorResponse("Name cannot be empty");
+  }
+
+  public ServiceResponse<Boolean> updateMemberPicture(Long memberNo, String picture) {
+    Optional<Member> optMember = memberRepository.findById(memberNo);
+    if (optMember.isEmpty()) {
+      return createErrorResponse("Member not found");
+    }
+
+    Member member = optMember.get();
+    if (picture != null && !picture.isBlank()) {
+      member.setPicture(picture);
+    }
+
+    memberRepository.save(member); // DB 업데이트
+    return createSuccessResponse(true);
+  }
+
+  public ServiceResponse<MemberResponse> createMember(
+          String email, String password, String accountType, String name, String picture) {
+    boolean joined = memberRepository.existsByEmail(email);
+    if (joined) {
+      return createErrorResponse("Member with this email already exists");
+    }
+
+    String encryptedPassword = passwordEncoder.encode(password);
+    Member member = memberRepository.save(new Member(email, encryptedPassword, accountType, name, picture));
     if (member.getNo() == 0L) {
       return createErrorResponse("Failed to create member");
     }
-    MemberDto memberDto = MemberDto.of(member.getNo(), member.getEmail(), member.getAccountType());
+    MemberDto memberDto = MemberDto.of(
+            member.getNo(),
+            member.getEmail(), member.getAccountType(), member.getName(), member.getPicture());
     memberDto.setAccessToken(this.getAccessToken(email));
     memberDto.setRefreshToken(this.getRefreshToken(email));
-    MemberResponse memberResponse = memberMapper.toResponse(memberDto);
+    MemberResponse memberResponse = new MemberResponse(
+            memberDto.getNo(),
+            memberDto.getEmail(),
+            memberDto.getName(),
+            memberDto.getPicture(),
+            memberDto.getAccountType(),
+            memberDto.getAccessToken(),
+            memberDto.getRefreshToken());
     return createSuccessResponse(memberResponse);
   }
 
@@ -156,20 +220,33 @@ public class MemberService {
     return this.processTemplate("reset-password.ftl", model);
   }
 
+  public String getContactUsPageHtmlContent(String name, String email, String message) {
+    Map<String, Object> model = new HashMap<>();
+    model.put("logoUrl", serverDomain + "/images/icon/logo_title.svg");
+    model.put("name", name);
+    model.put("email", email);
+    model.put("message", message);
+    return this.processTemplate("contact-us.ftl", model);
+  }
+
   public String getResetPasswordPageTextContent() {
     return this.loadTemplate("reset-password.txt");
+  }
+
+  public String getContactUsPageTextContent() {
+    return this.loadTemplate("contact-us.txt");
   }
 
   private String getAccessToken(String email) {
     return Optional.ofNullable(email)
             .filter(e -> !e.isBlank())
-            .map(jwtService::createAccessToken)
+            .map(jwtUtil::createAccessToken)
             .orElse("");
   }
   private String getRefreshToken(String email) {
     return Optional.ofNullable(email)
             .filter(e -> !e.isBlank())
-            .map(jwtService::createRefreshToken)
+            .map(jwtUtil::createRefreshToken)
             .orElse("");
   }
 
@@ -180,9 +257,17 @@ public class MemberService {
     if (member.getNo() == 0L) {
       return MemberDto.empty();
     }
-    MemberDto memberDto = MemberDto.of(member.getNo(), member.getEmail(), member.getAccountType());
-    memberDto.setAccessToken(this.getAccessToken(email));
-    memberDto.setRefreshToken(this.getRefreshToken(email));
+    String accessToken = this.getAccessToken(email);
+    String refreshToken = this.getRefreshToken(email);
+    MemberDto memberDto = MemberDto.of(
+            member.getNo(),
+            member.getEmail(),
+            member.getAccountType(),
+            member.getName(),
+            member.getPicture());
+
+    memberDto.setAccessToken(accessToken);
+    memberDto.setRefreshToken(refreshToken);
     return memberDto;
   }
 

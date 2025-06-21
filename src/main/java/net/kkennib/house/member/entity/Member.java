@@ -16,6 +16,12 @@ public class Member {
     private Long no;
 
     @Column
+    private String name;
+
+    @Column
+    private String picture;
+
+    @Column
     private String email;
 
     @Column
@@ -24,10 +30,12 @@ public class Member {
     @Column(name="account_type", nullable = false)
     private String accountType = AccountType.EMAIL.getValue();
 
-    public Member(String email, String password, String accountType) {
+    public Member(String email, String password, String accountType, String name, String picture) {
         this.email = email;
         this.password = password;
         this.accountType = accountType;
+        this.name = name;
+        this.picture = picture;
     }
 }
 

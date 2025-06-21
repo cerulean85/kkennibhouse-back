@@ -1,15 +1,16 @@
-package net.kkennib.house.service;
+package net.kkennib.house.util;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
 
 
-@Service
-public class JwtService {
+@Component
+public class JwtUtil {
     private final String secret = "your-secret-key";
 
     public String createAccessToken(String email) {

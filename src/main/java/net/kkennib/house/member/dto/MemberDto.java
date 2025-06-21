@@ -12,14 +12,16 @@ public class MemberDto {
   private Long no;
   private String email;
   private String accountType;
+  private String name;
+  private String picture;
   private String accessToken;
   private String refreshToken;
 
   public static MemberDto empty() {
-    return new MemberDto(0L, "", "", "", "");
+    return new MemberDto(0L, "", "", "", "", "", "");
   }
 
-  public static MemberDto of(Long no, String email, String accountType) {
-    return new MemberDto(no, email, accountType, "", "");
+  public static MemberDto of(Long no, String email, String accountType, String name, String picture) {
+    return new MemberDto(no, email, accountType, "", "", "", "");
   }
 }

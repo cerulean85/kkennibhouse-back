@@ -1,22 +1,22 @@
 package net.kkennib.house.member.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.kkennib.house.dto.ServiceResponse;
 import net.kkennib.house.enums.AccountType;
 import net.kkennib.house.member.dto.MemberDto;
 import net.kkennib.house.member.service.EmailService;
 import net.kkennib.house.member.dto.MemberResponse;
 import net.kkennib.house.member.service.MemberService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static net.kkennib.house.util.ResponseFactory.createErrorResponse;
 import static net.kkennib.house.util.ResponseFactory.createSuccessResponse;
 
+@Slf4j
 @RestController
 @RequestMapping("/member")
 @RequiredArgsConstructor
@@ -25,21 +25,33 @@ public class MemberLogInController {
   private final MemberService memberService;
   private final EmailService emailService;
 
+  @Value("${custom.email.contact}")
+  private String contactEmail;
+
   @PostMapping("/log-in")
   public ServiceResponse<MemberResponse> login(@RequestBody Map<String, String> request) {
     String email = request.get("email");
     String password = request.get("password");
     String accountType = request.get("accountType");
+    String picture = request.get("picture");
     ServiceResponse<MemberResponse> memberResponse =  memberService.getEmailMemberByPasswordAndAccountType(email, password, accountType);
+    MemberResponse res = memberResponse.getData();
+    if (!res.getPicture().equals(picture)) {
+      memberService.updateMemberPicture(res.getNo(), picture);
+    } else {
+      log.warn("Name or picture mismatch during login for email: {}", email);
+    }
     return memberResponse;
   }
 
   @PostMapping("/sign-up")
-  public ServiceResponse<MemberResponse> emailSignup(@RequestBody Map<String, String> request) {
+  public ServiceResponse<MemberResponse> signup(@RequestBody Map<String, String> request) {
     String email = request.get("email");
     String password = request.get("password");
     String accountType = request.get("accountType");
-    return memberService.createEmailMember(email, password, accountType);
+    String name = request.get("name");
+    String picture = request.get("picture");
+    return memberService.createMember(email, password, accountType, name, picture);
   }
 
   @GetMapping("/check-reset-token")
@@ -51,7 +63,7 @@ public class MemberLogInController {
   }
 
   @PostMapping("/send-password-reset-email")
-  public ServiceResponse<Object> sendTestEmail(@RequestBody Map<String, String> request) {
+  public ServiceResponse<Boolean> sendTestEmail(@RequestBody Map<String, String> request) {
     String email = request.get("email");
     String accountType = AccountType.EMAIL.getValue();
     MemberDto memberDto = memberService.getEmailMemberByAccountType(email, accountType);
@@ -63,23 +75,57 @@ public class MemberLogInController {
     String token = memberService.getResetToken(memberNo);
     String htmlContent = memberService.getResetPasswordPageHtmlContent(token);
     String textContent = memberService.getResetPasswordPageTextContent();
-    emailService.sendEmail(
-            email,
-            "Reset your Stock DEV password",
-            htmlContent,
-            textContent
-    );
-    return createSuccessResponse(null);
+    try {
+      emailService.sendEmail(
+              email,
+              "Reset your Stock DEV password",
+              htmlContent,
+              textContent
+      );
+    } catch (Exception e) {
+      log.error("Error processing template: {}", e.getMessage());
+      return createErrorResponse("Email address is not verified.");
+    }
+    return createSuccessResponse(true);
   }
 
   @PutMapping("/update-password")
   public ServiceResponse<Boolean> updatePassword(@RequestBody Map<String, String> request) {
-    Long memberNo = Long.valueOf(request.get("memberNo"));
     String token = request.get("token");
-    String newPassword = request.get("newPassword");
+    String newPassword = request.get("password");
     if (token == null || newPassword == null) {
       return createErrorResponse("Token and new password are required.");
     }
-    return memberService.updatePassword(memberNo, token, newPassword);
+    return memberService.updatePassword(token, newPassword);
   }
+
+  @PutMapping("/update-name")
+  public ServiceResponse<Boolean> updateName(@RequestBody Map<String, String> request) {
+    String email = request.get("email");
+    String name = request.get("name");
+    return memberService.updateName(email, name);
+  }
+
+  @PostMapping("/contact-us")
+  public ServiceResponse<Boolean> contactUs(@RequestBody Map<String, String> request) {
+    String name = request.get("name");
+    String email = request.get("email");
+    String message = request.get("message");
+
+    String htmlContent = memberService.getContactUsPageHtmlContent(name, email, message);
+    String textContent = memberService.getContactUsPageTextContent();
+    try {
+      emailService.sendEmail(
+              contactEmail,
+              "A user has a question about Stock DEV.",
+              htmlContent,
+              textContent
+      );
+    } catch (Exception e) {
+      log.error("Error processing template: {}", e.getMessage());
+      return createErrorResponse("Email address is not verified.");
+    }
+    return createSuccessResponse(true);
+  }
+
 }

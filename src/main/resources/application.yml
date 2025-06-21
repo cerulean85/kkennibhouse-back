@@ -27,6 +27,8 @@ cloud:
 custom:
   settings:
     page-count: 20
+  email:
+    contact: zhwan85@kkennib.net
 
 google:
   client-id: 869848138291-enoea2g8mspqsc31tudefitab5atl5c4.apps.googleusercontent.com
